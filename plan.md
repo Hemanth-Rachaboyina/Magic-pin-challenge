@@ -44,8 +44,8 @@
 ## Phase 4: Productionization & Submission
 *Goal: Ensure the bot is unkillable during the real judge's dynamic injection scenarios.*
 
-- [ ] **Resilience:** Add global exception handlers in FastAPI. If the LLM times out or fails, return a safe fallback empty action `{ "actions": [] }` rather than crashing the test slot.
-- [ ] **Documentation:** Write the required one-page `README.md` explaining the architecture, the choice of Gemini 2.5 Pro (for its superior instruction following and context window), and the structured output strategy.
-- [ ] **Deployment:** Host the application on a fast, reliable public cloud provider (e.g., Render, Railway).
-- [ ] **Final Verification:** Run the local judge one last time against the *public* URL to verify network latency is within the judge's budget.
+- [x] **Resilience:** Add global exception handlers in FastAPI. If the LLM times out or fails, return a safe fallback empty action `{ "actions": [] }` rather than crashing the test slot.
+- [x] **Documentation:** Write the required one-page `README.md` explaining the architecture, the choice of Gemini 2.5 Pro (for its superior instruction following and context window), and the structured output strategy.
+- [x] **Deployment:** Host the application on a fast, reliable public cloud provider (e.g., Render, Railway).
+- [x] **Final Verification:** Run the local judge one last time against the *public* URL to verify network latency is within the judge's budget.
 - [ ] **Submit:** Provide the public bot URL to magicpin.

@@ -26,8 +26,8 @@ load_dotenv()
 from models import openai_model
 
 # Your bot's URL (where your bot is running)
-BOT_URL = "http://localhost:8080"
-
+# BOT_URL = "http://localhost:8080"https://magic-pin-challenge.onrender.com
+BOT_URL = "https://magic-pin-challenge.onrender.com"
 # Choose your LLM provider: "openai", "anthropic", "gemini", "deepseek", "groq", "ollama", "openrouter"
 LLM_PROVIDER = "openai"
 
@@ -415,24 +415,24 @@ class BotClient:
             return None, str(e), (time.time() - start) * 1000
 
     def healthz(self):
-        return self._request("GET", "/v1/healthz", 5)
+        return self._request("GET", "/v1/healthz", 60)
 
     def metadata(self):
-        return self._request("GET", "/v1/metadata", 5)
+        return self._request("GET", "/v1/metadata", 60)
 
     def push_context(self, scope, cid, version, payload):
-        return self._request("POST", "/v1/context", 10, {
+        return self._request("POST", "/v1/context", 60, {
             "scope": scope, "context_id": cid, "version": version,
             "payload": payload, "delivered_at": datetime.utcnow().isoformat() + "Z"
         })
 
     def tick(self, triggers):
-        return self._request("POST", "/v1/tick", 15, {
+        return self._request("POST", "/v1/tick", 120, {
             "now": datetime.utcnow().isoformat() + "Z", "available_triggers": triggers
         })
 
     def reply(self, conv_id, merchant_id, message, turn):
-        return self._request("POST", "/v1/reply", 15, {
+        return self._request("POST", "/v1/reply", 120, {
             "conversation_id": conv_id, "merchant_id": merchant_id, "customer_id": None,
             "from_role": "merchant", "message": message,
             "received_at": datetime.utcnow().isoformat() + "Z", "turn_number": turn
@@ -645,12 +645,12 @@ class JudgeSimulator:
 
         print_section("CONTEXT PUSH")
         for slug, cat in self.dataset.categories.items():
-            data, err, _ = self.client.push_context("category", slug, 1, cat)
+            data, err, _ = self.client.push_context("category", slug, int(time.time()), cat)
             status = "PASS" if data and data.get("accepted") else "FAIL"
             print(f"  [{status}] category/{slug}")
 
         for mid, m in list(self.dataset.merchants.items())[:5]:
-            data, err, _ = self.client.push_context("merchant", mid, 1, m)
+            data, err, _ = self.client.push_context("merchant", mid, int(time.time()), m)
             status = "PASS" if data and data.get("accepted") else "FAIL"
             short_id = mid.split('_')[1] if '_' in mid else mid[:10]
             print(f"  [{status}] merchant/{short_id}")
@@ -665,7 +665,7 @@ class JudgeSimulator:
 
         trigs = list(self.dataset.triggers.keys())[:3]
         for tid in trigs:
-            self.client.push_context("trigger", tid, 1, self.dataset.triggers[tid])
+            self.client.push_context("trigger", tid, int(time.time()), self.dataset.triggers[tid])
 
         data, err, lat = self.client.tick(trigs)
         if err:
@@ -811,9 +811,9 @@ class JudgeSimulator:
         print_section("FULL EVALUATION")
 
         for mid, m in self.dataset.merchants.items():
-            self.client.push_context("merchant", mid, 1, m)
+            self.client.push_context("merchant", mid, int(time.time()), m)
         for tid, t in self.dataset.triggers.items():
-            self.client.push_context("trigger", tid, 1, t)
+            self.client.push_context("trigger", tid, int(time.time()), t)
 
         print_success("All contexts pushed")
 

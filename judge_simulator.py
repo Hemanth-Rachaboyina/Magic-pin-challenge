@@ -832,7 +832,7 @@ class JudgeSimulator:
             print_info(f"Batch {i//5 + 1}: {len(actions)} actions ({lat:.0f}ms)")
 
             for action in actions:
-                self._score_and_display(action, verbose=False)
+                self._score_and_display(action, verbose=True)
 
         return True
 
@@ -850,8 +850,8 @@ class JudgeSimulator:
         score = self.scorer.score(action, category, merchant, trigger, customer)
         self.all_scores.append(score)
 
-        body = action.get("body", "")[:50]
-        print(f"\n{Colors.CYAN}Message:{Colors.RESET} \"{body}...\"")
+        body = action.get("body", "")
+        print(f"\n{Colors.CYAN}Message:{Colors.RESET} \"{body}\"")
 
         print_score_bar("Specificity", score.specificity)
         if verbose and score.specificity_reason:

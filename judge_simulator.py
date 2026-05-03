@@ -31,6 +31,8 @@ BOT_URL = "http://localhost:8080"
 # Choose your LLM provider: "openai", "anthropic", "gemini", "deepseek", "groq", "ollama", "openrouter"
 LLM_PROVIDER = "openai"
 
+Evaluator_llm = "gpt-4o"
+
 # Your API key (paste your key here)
 LLM_API_KEY = os.environ.get("OPENAI_API_KEY", "")  # <-- PUT YOUR API KEY HERE
 

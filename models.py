@@ -7,7 +7,7 @@ import openai
 
 load_dotenv()
 
-openai_model = "gpt-4.1-mini"
+openai_model = "gpt-4o"
 # openai_model = "o3"
 
 T = TypeVar('T', bound=BaseModel)

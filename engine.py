@@ -236,7 +236,14 @@ No explanation.
 No markdown fences.
 No extra keys.
 
-
+{
+  "conversation_id": "conv_<merchant_id>_<trigger_id>",
+  "send_as": "vera | merchant_on_behalf",
+  "body": "<3-5 sentences message text using correct tone and logic>",
+  "cta": "binary_yes_no | open_ended | link_click",
+  "suppression_key": "<unique_string>",
+  "rationale": "<brief explanation of strategy>"
+}
 """
     
     user_prompt = f"Here is the current state:\n{context_str}\n\nCompose the action."
@@ -349,6 +356,19 @@ UNCLEAR
 - Ask exactly one binary clarification:
   "Did you mean yes to the [offer name + price] campaign, or do you have a question first?"
 - Do not add a second question.
+
+## STEP 3: OUTPUT FORMAT
+Return only valid JSON.
+No explanation.
+No markdown fences.
+
+{
+  "action": "send | wait | end",
+  "body": "<message text, required if action is 'send'>",
+  "cta": "<CTA type, required if action is 'send'>",
+  "wait_seconds": <integer, required if action is 'wait'>,
+  "rationale": "<brief explanation of intent and strategy>"
+}
 """
     user_prompt = f"--- HISTORY ---\n{history_str}\n\n--- LATEST REPLY ({from_role}) ---\n{new_message}\n\nDetermine the next action."
 

@@ -70,26 +70,34 @@ async def push_context(request: ContextPushRequest):
 # CORE LOGIC ENDPOINTS (Mocked for now)
 # -----------------------------------------------------------------------------
 @app.post("/v1/tick", response_model=TickResponse)
-async def tick(request: TickRequest):
+def tick(request: TickRequest):
     actions = []
     
-    # Process the first available trigger
-    if request.available_triggers:
-        trigger_id = request.available_triggers[0]
-        try:
-            logger.info(f"Generating tick action for trigger: {trigger_id}")
-            action = compose_tick_message(trigger_id)
-            actions.append(action)
-        except Exception as e:
-            logger.error(f"Error generating action: {str(e)}")
-            # Fallback to empty actions array so we don't crash the judge
-            pass
+    # Process up to 10 triggers concurrently to stay well within 30s timeout
+    triggers_to_process = request.available_triggers[:10]
+    
+    if triggers_to_process:
+        import concurrent.futures
+        
+        def process_trigger(trigger_id):
+            try:
+                logger.info(f"Generating tick action for trigger: {trigger_id}")
+                return compose_tick_message(trigger_id)
+            except Exception as e:
+                logger.error(f"Error generating action for {trigger_id}: {str(e)}")
+                return None
+
+        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+            results = executor.map(process_trigger, triggers_to_process)
+            for action in results:
+                if action is not None:
+                    actions.append(action)
             
     return TickResponse(actions=actions)
 
 
 @app.post("/v1/reply", response_model=ReplyResponse)
-async def reply(request: ReplyRequest):
+def reply(request: ReplyRequest):
     # Store incoming message
     store.append_conversation(
         request.conversation_id, 

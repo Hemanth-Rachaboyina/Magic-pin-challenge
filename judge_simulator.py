@@ -26,8 +26,8 @@ load_dotenv()
 from models import openai_model
 
 # Your bot's URL (where your bot is running)
-# BOT_URL = "http://localhost:8080"https://magic-pin-challenge.onrender.com
-BOT_URL = "https://magic-pin-challenge.onrender.com"
+BOT_URL = "http://localhost:8080"
+# BOT_URL = "https://magic-pin-challenge.onrender.com"
 # Choose your LLM provider: "openai", "anthropic", "gemini", "deepseek", "groq", "ollama", "openrouter"
 LLM_PROVIDER = "openai"
 
@@ -176,14 +176,29 @@ class OpenAIProvider(LLMProvider):
             "max_tokens": 1500
         }).encode("utf-8")
 
-        req = urlrequest.Request(
-            "https://api.openai.com/v1/chat/completions",
-            data=body,
-            headers={"Authorization": f"Bearer {self.api_key}", "Content-Type": "application/json"}
-        )
-        resp = urlrequest.urlopen(req, timeout=TIMEOUT_LLM)
-        data = json.loads(resp.read().decode("utf-8"))
-        return data["choices"][0]["message"]["content"]
+        import time
+        import urllib.error
+        
+        max_retries = 5
+        base_wait = 2
+        
+        for attempt in range(max_retries):
+            try:
+                req = urlrequest.Request(
+                    "https://api.openai.com/v1/chat/completions",
+                    data=body,
+                    headers={"Authorization": f"Bearer {self.api_key}", "Content-Type": "application/json"}
+                )
+                resp = urlrequest.urlopen(req, timeout=TIMEOUT_LLM)
+                data = json.loads(resp.read().decode("utf-8"))
+                return data["choices"][0]["message"]["content"]
+            except urllib.error.HTTPError as e:
+                if e.code == 429 and attempt < max_retries - 1:
+                    wait_time = base_wait * (2 ** attempt)
+                    print(f"\n[WARN] Rate limited (429). Retrying in {wait_time}s...")
+                    time.sleep(wait_time)
+                else:
+                    raise e
 
 
 class AnthropicProvider(LLMProvider):
@@ -536,7 +551,7 @@ Score each dimension 0-10 with clear reasoning. Be STRICT."""
 
         try:
             print_llm("Analyzing message...")
-            # time.sleep(5) # Pace requests to avoid Gemini 429 rate limit
+            time.sleep(3) # Pace requests to avoid 429 rate limits
             response = self.llm.complete(prompt, self.SYSTEM)
             return self._parse_response(response, action)
         except Exception as e:

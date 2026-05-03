@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Literal
 from pydantic import BaseModel, Field
 from datetime import datetime
 
@@ -91,7 +91,7 @@ class ReplyRequest(BaseModel):
 
 
 class ReplyResponse(BaseModel):
-    action: str = Field(description="Must be 'send', 'wait', or 'end'")
+    action: Literal["send", "wait", "end"] = Field(description="Must be exactly 'send', 'wait', or 'end'")
     body: Optional[str] = Field(default=None, description="The message body, required if action is 'send'")
     cta: Optional[str] = Field(default=None, description="The CTA type, required if action is 'send'")
     wait_seconds: Optional[int] = Field(default=None, description="Seconds to wait, required if action is 'wait'")
